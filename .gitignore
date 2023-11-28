@@ -10,3 +10,4 @@
 **/report/article.out
 **/.ipynb_checkpoints
 data/
+.secrets
