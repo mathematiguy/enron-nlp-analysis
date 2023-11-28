@@ -7,6 +7,8 @@
 **/report/article.blg
 **/report/article.fdb_latexmk
 **/report/article.fls
+**/report/article.log
 **/report/article.out
 **/.ipynb_checkpoints
 data/
+.secrets
