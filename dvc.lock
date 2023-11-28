@@ -1,0 +1,28 @@
+schema: '2.0'
+stages:
+  download:
+    cmd: wget https://www.cs.cmu.edu/~enron/enron_mail_20150507.tar.gz -O data/enron_mail_20150507.tar.gz
+    outs:
+    - path: data/enron_mail_20150507.tar.gz
+      hash: md5
+      md5: 0dfec6b13323d01f4275c6913f461ac6
+      size: 443254787
+  unzip:
+    cmd: tar -xf data/enron_mail_20150507.tar.gz -C data/
+    deps:
+    - path: data/enron_mail_20150507.tar.gz
+      hash: md5
+      md5: 0dfec6b13323d01f4275c6913f461ac6
+      size: 443254787
+  report:
+    cmd: bash -c "cd report && latexmk article.tex -pdf"
+    deps:
+    - path: report/article.tex
+      hash: md5
+      md5: 079eb431ce9dffdb495d5bd2cbd2ea79
+      size: 2778
+    outs:
+    - path: report/article.pdf
+      hash: md5
+      md5: 8261573cbd4938da6b8d0964dcfa6fdf
+      size: 62215

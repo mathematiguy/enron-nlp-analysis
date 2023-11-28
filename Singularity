@@ -36,10 +36,28 @@ From: texlive/texlive:latest-full-doc
     apt update
     apt install -y curl software-properties-common build-essential rsync python3-launchpadlib
     add-apt-repository ppa:deadsnakes/ppa -y
-    add-apt-repository ppa:rmescandon/yq -y
 
-    # Install yq (yaml processing)
-    apt install -y yq
+    echo "Installing LaTeX packages..."
+    tlmgr init-usertree && \
+    tlmgr update --all
+    tlmgr install koma-script
+
+    echo "Install Garamond font"
+
+    # Download and install URW Garamond font
+    wget https://mirrors.ctan.org/fonts/urw/garamond.zip
+    unzip garamond.zip
+    mkdir -p /usr/local/texlive/texmf-local/fonts/type1/urw/garamond
+    mkdir -p /usr/local/texlive/texmf-local/fonts/afm/urw/garamond
+    cp garamond/ugmr8a.pfb garamond/ugmm8a.pfb garamond/ugmri8a.pfb garamond/ugmmi8a.pfb /usr/local/texlive/texmf-local/fonts/type1/urw/garamond/
+    cp garamond/ugmr8a.afm garamond/ugmm8a.afm garamond/ugmri8a.afm garamond/ugmmi8a.afm /usr/local/texlive/texmf-local/fonts/afm/urw/garamond/
+
+    # Unzip TeX support files
+    unzip garamond/ugm.zip -d /usr/local/texlive/texmf-local/
+
+    # Update filename database and font maps
+    mktexlsr
+    updmap-sys --enable Map=ugm.map    
 
     # Set the Python version
     PYTHON_VERSION=3.11
