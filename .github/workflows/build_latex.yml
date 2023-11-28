@@ -47,3 +47,9 @@ jobs:
 
     - name: Build LaTeX Document
       run: pdflatex report/article.tex
+
+    - name: Upload PDF as Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: built-document
+        path: report/article.pdf
