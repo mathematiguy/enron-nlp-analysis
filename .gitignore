@@ -1,0 +1,12 @@
+**/.#*
+**/*.sif
+**/.DS_Store
+**/report/article.pdf
+**/report/article.aux
+**/report/article.bbl
+**/report/article.blg
+**/report/article.fdb_latexmk
+**/report/article.fls
+**/report/article.out
+**/.ipynb_checkpoints
+data/
