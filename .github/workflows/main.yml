@@ -1,0 +1,58 @@
+name: ML Workflow with DVC, LaTeX Report Compilation, and Dependency Installation
+
+on: [push, pull_request]
+
+jobs:
+  run_code:
+    name: Run code
+    runs-on: ubuntu-latest
+    container: texlive/texlive:latest-full-doc
+
+    steps:
+      - name: Check out the current repository
+        uses: actions/checkout@v2
+
+    - name: Prepare Environment
+      run: |
+        echo "Installing Tools with apt-get"
+        apt-get update
+        apt-get install -y curl wget unzip software-properties-common git dvc build-essential
+        add-apt-repository ppa:deadsnakes/ppa -y
+
+      - name: Install Garamond Font
+        run: |
+          wget https://mirrors.ctan.org/fonts/urw/garamond.zip
+          unzip garamond.zip
+          mkdir -p /usr/local/texlive/texmf-local/fonts/type1/urw/garamond
+          mkdir -p /usr/local/texlive/texmf-local/fonts/afm/urw/garamond
+          cp garamond/*.pfb /usr/local/texlive/texmf-local/fonts/type1/urw/garamond/
+          cp garamond/*.afm /usr/local/texlive/texmf-local/fonts/afm/urw/garamond/
+          unzip garamond/ugm.zip -d /usr/local/texlive/texmf-local/
+          mktexlsr
+          updmap-sys --enable Map=ugm.map
+
+      - name: Pull data from DVC
+        run: |
+          dvc remote modify origin --local auth basic
+          dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
+          dvc remote modify origin --local password ${{ secrets.DAGSHUB_TOKEN }}
+          dvc pull
+
+      - name: Run the pipeline with DVC
+        run: dvc checkout && dvc repro -s report
+
+      - name: Push the outcomes to DVC remote storage
+        run: dvc push
+
+      - name: Commit changes in dvc.lock
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Commit changes in dvc.lock
+          branch: dvc-pipeline
+          file_pattern: dvc.lock
+
+      - name: Upload PDF as Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: built-document
+          path: report/article.pdf
