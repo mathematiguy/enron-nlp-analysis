@@ -28,6 +28,7 @@ jupyter: $(SANDBOX)
 	sudo singularity exec \
     -B $$(pwd):/mnt --pwd /mnt \
     $(SANDBOX) jupyter lab \
+		--allow-root \
 		--ip=0.0.0.0 \
 		--no-browser \
 		--port 8888
