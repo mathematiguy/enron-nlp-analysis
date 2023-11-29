@@ -43,7 +43,7 @@ $(SANDBOX): Singularity requirements.txt
 
 REMOTE ?= cn-f001
 push:
-	rsync -rvahzP ${IMAGE} ${REMOTE}.server.mila.quebec:comp-550/assignment-2/
+	rsync -rvahzP ${IMAGE} ${REMOTE}.server.mila.quebec:comp-550/group-project/
 
 shell:
 	singularity shell --nv $(FLAGS) $(IMAGE) $(SINGULARITY_ARGS) bash
