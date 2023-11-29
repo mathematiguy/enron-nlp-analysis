@@ -10,7 +10,7 @@ VENV_PATH ?= venv
 .PHONY: report clean jupyter container shell
 
 start_lab:
-	mila serve lab --alloc -c 4 --mem=16G -t 6:00:00
+	mila serve lab --alloc --gres=gpu:1 -c 8 --mem=32G -t 4:00:00
 
 start_local:
 	salloc --gres=gpu:1 -c 16 --mem=32G -t 6:00:00
