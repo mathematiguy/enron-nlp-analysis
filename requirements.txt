@@ -12,6 +12,7 @@ numpy
 pandas
 scikit-learn
 scipy
+stanza
 torch>=2.0.1
 tqdm
 transformers
