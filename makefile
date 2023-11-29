@@ -43,10 +43,6 @@ sandbox: $(SANDBOX)
 $(SANDBOX): Singularity requirements.txt
 	sudo singularity build --sandbox $@ Singularity
 
-REMOTE ?= cn-f001
-push:
-	rsync -rvahzP ${IMAGE} ${REMOTE}.server.mila.quebec:comp-550/group-project/
-
 shell:
 	singularity shell --nv $(FLAGS) $(IMAGE) $(SINGULARITY_ARGS) bash
 
