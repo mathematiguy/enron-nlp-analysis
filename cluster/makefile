@@ -1,13 +1,13 @@
 # This Makefile automates routine tasks for this Singularity-based project.
 REPO_NAME := $(shell basename `git rev-parse --show-toplevel` | tr '[:upper:]' '[:lower:]')
-IMAGE := $(REPO_NAME).sif
-RUN ?= singularity exec $(FLAGS) -B submodules/llama:/opt/llama $(IMAGE)
+IMAGE := container.sif
+RUN ?= singularity exec $(FLAGS) -B $(DVC_CACHE_DIR) -B submodules/llama:/opt/llama $(IMAGE)
 SINGULARITY_ARGS ?=
 DVC_CACHE_DIR ?= $(shell dvc cache dir)
 FLAGS ?=
 VENV_PATH ?= venv
-ARCHIVE ?= /archive
-SCRATCH ?= /scratch
+ARCHIVE ?= /network/archive/c/caleb.moses
+SCRATCH ?= /network/scratch/c/caleb.moses
 
 .PHONY: gpu_alloc show_logs set_secrets encrypt squeue trigger push dvc-setup
 
@@ -42,6 +42,8 @@ push:
 dvc-setup: $(SCRATCH)/$(REPO_NAME)/logs \
 	$(SCRATCH)/$(REPO_NAME)/dvc \
 	$(ARCHIVE)/$(REPO_NAME)/dvc
+	dvc config cache.type symlink
+	dvc cache dir $(SCRATCH)/$(REPO_NAME)/dvc
 
 $(SCRATCH)/$(REPO_NAME)/logs:
 	mkdir -p $(SCRATCH)/$(REPO_NAME)/logs

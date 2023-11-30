@@ -2,7 +2,8 @@
 REPO_NAME := $(shell basename `git rev-parse --show-toplevel` | tr '[:upper:]' '[:lower:]')
 IMAGE := container.sif
 SANDBOX := sandbox.sif
-RUN ?= singularity exec $(FLAGS) $(IMAGE)
+RUN ?= singularity exec $(FLAGS) -B $(DVC_CACHE_DIR) $(IMAGE)
+DVC_CACHE_DIR ?= $(shell dvc cache dir)
 SINGULARITY_ARGS ?=
 FLAGS ?=
 VENV_PATH ?= venv
@@ -10,6 +11,10 @@ VENV_PATH ?= venv
 .PHONY: report clean jupyter container shell
 
 include cluster/makefile
+
+repro: FLAGS= -B $(SCRATCH) -B $(ARCHIVE)
+repro:
+	$(RUN) dvc repro
 
 start_lab:
 	mila serve lab --alloc --gres=gpu:1 -c 8 --mem=32G -t 4:00:00
@@ -19,9 +24,6 @@ start_local:
 
 loader:
 	$(RUN) python3 code/loader.py
-
-repro:
-	$(RUN) dvc repro
 
 clean:
 	rm -f report/*.blg report/*.fls report/*.out report/*.log report/*.fdb_latexmk report/*.aux report/*.pdf report/*.bbl report/*.toc
