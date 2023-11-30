@@ -2,7 +2,7 @@
 REPO_NAME := $(shell basename `git rev-parse --show-toplevel` | tr '[:upper:]' '[:lower:]')
 IMAGE := container.sif
 SANDBOX := sandbox.sif
-RUN ?= singularity exec $(FLAGS) -B $(DVC_CACHE_DIR) $(IMAGE)
+RUN ?= singularity exec -B $(DVC_CACHE_DIR) $(IMAGE)
 DVC_CACHE_DIR ?= $(shell dvc cache dir)
 SINGULARITY_ARGS ?=
 FLAGS ?=
@@ -12,7 +12,7 @@ VENV_PATH ?= venv
 
 include cluster/makefile
 
-repro: FLAGS= -B $(SCRATCH) -B $(ARCHIVE)
+repro: FLAGS= -B $(DVC_CACHE_DIR)
 repro:
 	$(RUN) dvc repro
 

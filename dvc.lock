@@ -14,15 +14,21 @@ stages:
       hash: md5
       md5: 0dfec6b13323d01f4275c6913f461ac6
       size: 443254787
+    outs:
+    - path: data/maildir
+      hash: md5
+      md5: c8a72c2aff8c93f301beacc56b60bf70.dir
+      size: 1421183736
+      nfiles: 517401
   report:
     cmd: bash -c "cd report && latexmk article.tex -pdf"
     deps:
     - path: report/article.tex
       hash: md5
-      md5: 90c73e92d4687bfc314c43b30cf1afb3
-      size: 2779
+      md5: ddea5843be57f91a64352fa37ce9e402
+      size: 2553
     outs:
     - path: report/article.pdf
       hash: md5
-      md5: df10eb442e7ea89be265a2691634ebec
+      md5: 0db136bb39da1600614596b3e578c4f5
       size: 74983

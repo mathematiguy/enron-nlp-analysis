@@ -7,6 +7,8 @@ stages:
     cmd: tar -xf data/enron_mail_20150507.tar.gz -C data/
     deps:
       - data/enron_mail_20150507.tar.gz
+    outs:
+      - data/maildir
   report:
     cmd: bash -c "cd report && latexmk article.tex -pdf"
     deps:
