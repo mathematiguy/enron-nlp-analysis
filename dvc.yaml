@@ -1,12 +1,9 @@
 stages:
   download:
-    cmd: wget https://www.cs.cmu.edu/~enron/enron_mail_20150507.tar.gz -O data/enron_mail_20150507.tar.gz
+    cmd: bash src/prepare_emails.sh
     outs:
-      - data/enron_mail_20150507.tar.gz
-  unzip:
-    cmd: tar -xf data/enron_mail_20150507.tar.gz -C data/
-    deps:
-      - data/enron_mail_20150507.tar.gz
+      - code/convert_to_parquet.py
+      - data/enron_emails.parquet
   report:
     cmd: bash -c "cd report && latexmk article.tex -pdf"
     deps:
