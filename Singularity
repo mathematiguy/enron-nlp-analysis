@@ -37,11 +37,6 @@ From: texlive/texlive:latest-full-doc
     apt install -y curl software-properties-common build-essential rsync python3-launchpadlib
     add-apt-repository ppa:deadsnakes/ppa -y
 
-    echo "Installing LaTeX packages..."
-    tlmgr init-usertree && \
-    tlmgr update --all
-    tlmgr install koma-script
-
     echo "Install Garamond font"
 
     # Download and install URW Garamond font
