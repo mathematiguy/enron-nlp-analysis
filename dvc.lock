@@ -1,25 +1,17 @@
 schema: '2.0'
 stages:
-  download:
-    cmd: wget https://www.cs.cmu.edu/~enron/enron_mail_20150507.tar.gz -O data/enron_mail_20150507.tar.gz
-    outs:
-    - path: data/enron_mail_20150507.tar.gz
-      hash: md5
-      md5: 0dfec6b13323d01f4275c6913f461ac6
-      size: 443254787
-  unzip:
-    cmd: tar -xf data/enron_mail_20150507.tar.gz -C data/
+  prepare_emails:
+    cmd: bash src/prepare_emails.sh
     deps:
-    - path: data/enron_mail_20150507.tar.gz
+    - path: code/convert_to_parquet.py
       hash: md5
-      md5: 0dfec6b13323d01f4275c6913f461ac6
-      size: 443254787
+      md5: a8fa47031ad7d03d77378c57abbf0a72
+      size: 4652
     outs:
-    - path: data/maildir
+    - path: data/enron_emails.parquet
       hash: md5
-      md5: c8a72c2aff8c93f301beacc56b60bf70.dir
-      size: 1421183736
-      nfiles: 517401
+      md5: e32b0855968545645da7d1fd57d32ba7
+      size: 598003929
   report:
     cmd: bash -c "cd report && latexmk article.tex -pdf"
     deps:
@@ -30,5 +22,17 @@ stages:
     outs:
     - path: report/article.pdf
       hash: md5
-      md5: 0db136bb39da1600614596b3e578c4f5
+      md5: a85c6b0dbc2336e2269b4757289566b1
       size: 74983
+  scrape_convictions:
+    cmd: python code/scrape_conviction_data.py --output data/convictions.csv
+    deps:
+    - path: code/scrape_conviction_data.py
+      hash: md5
+      md5: de00ddfdb649a1ddb83b665e648d6a8e
+      size: 3922
+    outs:
+    - path: data/convictions.csv
+      hash: md5
+      md5: db9b823991c86d5c98c2a6ab30e8fd78
+      size: 5517

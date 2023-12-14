@@ -1,10 +1,16 @@
 stages:
-  download:
+  prepare_emails:
     cmd: bash src/prepare_emails.sh
     deps:
       - code/convert_to_parquet.py
     outs:
       - data/enron_emails.parquet
+  scrape_convictions:
+    cmd: python code/scrape_conviction_data.py --output data/convictions.csv
+    deps:
+      - code/scrape_conviction_data.py
+    outs:
+      - data/convictions.csv
   report:
     cmd: bash -c "cd report && latexmk article.tex -pdf"
     deps:
