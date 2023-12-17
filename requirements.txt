@@ -12,6 +12,7 @@ matplotlib
 nltk
 numpy
 pandas
+pyprojroot
 scikit-learn
 scipy
 stanza
