@@ -45,7 +45,7 @@ class TextPreprocessor:
         use_stemmer=False,
         ngrams=1,
         remove_stopwords=True,
-        random_state=42
+        random_state=42,
     ):
         """
         Initializes the TextPreprocessor with specified options.
@@ -132,7 +132,9 @@ def identity_fn(x):
 
 
 class TextModelFactory:
-    def __init__(self, preprocess_func, model_type="naive", hyperparam=1, random_state=42):
+    def __init__(
+        self, preprocess_func, model_type="naive", hyperparam=1, random_state=42
+    ):
         """
         Initializes the TextModelFactory with specified preprocessing function, model type, and hyperparameters.
 
@@ -173,7 +175,9 @@ class TextModelFactory:
         elif self.model_type == "svm":
             self.classifier = SVC(C=self.hyperparam, random_state=self.random_state)
         elif self.model_type == "logistic":
-            self.classifier = LogisticRegression(C=self.hyperparam, random_state=self.random_state)
+            self.classifier = LogisticRegression(
+                C=self.hyperparam, random_state=self.random_state
+            )
 
         # Fit the model
         self.classifier.fit(X_vectorized, y_train)
@@ -338,10 +342,7 @@ def main(train_file, valid_file, test_file):
             "use_lemmatize": True,
             "remove_stopwords": True,
         },
-        "stem+unigram": {
-            "use_stemmer": True, 
-            "remove_stopwords": True
-        },
+        "stem+unigram": {"use_stemmer": True, "remove_stopwords": True},
         "lemmatize+bigram": {
             "use_lemmatize": True,
             "ngrams": 2,
@@ -398,7 +399,7 @@ def main(train_file, valid_file, test_file):
                         model_type,
                         hyperparam,
                         f1_score,
-                        acc
+                        acc,
                     ) = result
                     logging.info(
                         f"Processor={processor_name}, model_type={model_type}, hyperparam={hyperparam}, f1_score={f1_score}, acc={acc}"
@@ -413,10 +414,20 @@ def main(train_file, valid_file, test_file):
 
     results = run_experiments_in_parallel(n_series=1)
 
-    experiment_data = pd.DataFrame(results, columns=["model_path", "preprocessor", "model_type", "hyperparam", "val_f1_score", "val_acc"]).sort_values('val_f1_score', ascending=False)
+    experiment_data = pd.DataFrame(
+        results,
+        columns=[
+            "model_path",
+            "preprocessor",
+            "model_type",
+            "hyperparam",
+            "val_f1_score",
+            "val_acc",
+        ],
+    ).sort_values("val_f1_score", ascending=False)
 
     # Save experiment data
-    experiment_data.to_csv('data/experiment_data.csv', index=False)
+    experiment_data.to_csv("data/experiment_data.csv", index=False)
     print(experiment_data)
 
 
