@@ -12,20 +12,46 @@ stages:
     outs:
       - data/convictions.csv
   parse_messages:
-    cmd: python code/parse_messages.py --emails_file data/enron_emails.parquet --person_yaml data/person_info.yaml --output data/processed_emails.csv
+    cmd: python code/parse_messages.py --emails_file data/enron_emails.parquet --person_yaml data/person_info.yaml --output_dir data
     deps:
       - code/parse_messages.py
       - data/enron_emails.parquet
       - data/person_info.yaml
     outs:
-      - data/processed_emails.csv
+      - data/norm_emails.csv
+      - data/exec_emails.csv
+      - data/poi_emails.csv
   mask_datasets:
-    cmd: python code/mask_datasets.py --email_file data/processed_emails.csv --output data/masked_emails.csv
+    cmd: python code/mask_datasets.py
     deps:
       - code/mask_datasets.py
-      - data/processed_emails.csv
+      - data/norm_emails.csv
+      - data/exec_emails.csv
+      - data/poi_emails.csv
     outs:
-     - data/masked_emails.csv
+      - data/norm_masked_emails.csv
+      - data/exec_masked_emails.csv
+      - data/poi_masked_emails.csv
+  dataset_splitting:
+    cmd: python code/dataset_splitting.py --poi_file data/poi_masked_emails.csv --exec_file data/exec_masked_emails.csv --norm_file data/norm_masked_emails.csv --output_dir data
+    deps:
+      - code/dataset_splitting.py
+      - data/poi_masked_emails.csv
+      - data/exec_masked_emails.csv
+      - data/norm_masked_emails.csv
+    outs:
+      - data/train_set.csv
+      - data/valid_set.csv
+      - data/test_set.csv
+  modelling:
+    cmd: mkdir -p data/model_runs && python code/modelling.py --train_file data/train_set.csv --valid_file data/valid_set.csv --test_file data/test_set.csv
+    deps:
+      - data/train_set.csv
+      - data/valid_set.csv
+      - data/test_set.csv
+    outs:
+      - data/experiment_data.csv
+      - data/model_runs
   report:
     cmd: bash -c "cd report && latexmk article.tex -pdf"
     deps:

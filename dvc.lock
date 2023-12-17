@@ -38,12 +38,12 @@ stages:
       size: 5517
   parse_messages:
     cmd: python code/parse_messages.py --emails_file data/enron_emails.parquet --person_yaml
-      data/person_info.yaml --output data/processed_emails.csv
+      data/person_info.yaml --output_dir data
     deps:
     - path: code/parse_messages.py
       hash: md5
-      md5: de35f9032a3704cb3a3fcd4f5a1cd91b
-      size: 9363
+      md5: 557414a03ac901fe8072e740aa17d016
+      size: 10884
     - path: data/enron_emails.parquet
       hash: md5
       md5: e32b0855968545645da7d1fd57d32ba7
@@ -53,24 +53,81 @@ stages:
       md5: edb3847eda1bc5aad5a96915aad393e7
       size: 2193
     outs:
-    - path: data/processed_emails.csv
+    - path: data/exec_emails.csv
       hash: md5
-      md5: 9ee6af0a052c3759155a3eacb9884c55
-      size: 72027320
+      md5: 73882d3d8daa266eddf749b844088f97
+      size: 44433937
+    - path: data/norm_emails.csv
+      hash: md5
+      md5: 812877ed37ac67ffc118c3163a1c439b
+      size: 62324341
+    - path: data/poi_emails.csv
+      hash: md5
+      md5: 9f58237e685daa9e36e56342717c5407
+      size: 3513568
   mask_datasets:
-    cmd: python code/mask_datasets.py --email_file data/processed_emails.csv --output
-      data/masked_emails.csv
+    cmd: python code/mask_datasets.py
     deps:
     - path: code/mask_datasets.py
       hash: md5
-      md5: 975113911d4d0510ba3a33e55e9d37ec
-      size: 3882
-    - path: data/processed_emails.csv
+      md5: 49ead517630c098d7827f78e6532dbac
+      size: 3975
+    - path: data/exec_emails.csv
       hash: md5
-      md5: 9ee6af0a052c3759155a3eacb9884c55
-      size: 72027320
+      md5: 73882d3d8daa266eddf749b844088f97
+      size: 44433937
+    - path: data/norm_emails.csv
+      hash: md5
+      md5: 812877ed37ac67ffc118c3163a1c439b
+      size: 62324341
+    - path: data/poi_emails.csv
+      hash: md5
+      md5: 9f58237e685daa9e36e56342717c5407
+      size: 3513568
     outs:
-    - path: data/masked_emails.csv
+    - path: data/exec_masked_emails.csv
       hash: md5
-      md5: b1e32fa0c2c8a1020f3631f163739c24
-      size: 146206503
+      md5: 007773a65a25c495eba45b78e190a65c
+      size: 90566371
+    - path: data/norm_masked_emails.csv
+      hash: md5
+      md5: d28ff2ec352c22f961b0e4c9f2ae219f
+      size: 181420716
+    - path: data/poi_masked_emails.csv
+      hash: md5
+      md5: b55e769bde5a88784fc5f73c4ccc2bf4
+      size: 6546914
+  dataset_splitting:
+    cmd: python code/dataset_splitting.py --poi_file data/poi_masked_emails.csv --exec_file
+      data/exec_masked_emails.csv --norm_file data/norm_masked_emails.csv --output_dir
+      data
+    deps:
+    - path: code/dataset_splitting.py
+      hash: md5
+      md5: 548c597ac5efca710a3c5226c1d6d6b3
+      size: 3975
+    - path: data/exec_masked_emails.csv
+      hash: md5
+      md5: 007773a65a25c495eba45b78e190a65c
+      size: 90566371
+    - path: data/norm_masked_emails.csv
+      hash: md5
+      md5: d28ff2ec352c22f961b0e4c9f2ae219f
+      size: 181420716
+    - path: data/poi_masked_emails.csv
+      hash: md5
+      md5: b55e769bde5a88784fc5f73c4ccc2bf4
+      size: 6546914
+    outs:
+    - path: data/test_set.csv
+      hash: md5
+      md5: 6502d9944c87aefa34e91803fa4786e4
+      size: 8317942
+    - path: data/train_set.csv
+      hash: md5
+      md5: 0b8e5f915928d343bafe3c8421f28896
+      size: 16244102
+    - path: data/valid_set.csv
+      hash: md5
+      md5: 45ece86a0bb4fd571a8530b55004f135
+      size: 4851944

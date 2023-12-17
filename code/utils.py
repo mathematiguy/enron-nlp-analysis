@@ -23,11 +23,11 @@ def parallel_apply(input_list, func, cores=None, n_series=0):
     Returns:
         list or pd.Series: A list or pandas Series (matching the input type) of results with the function applied to each item.
 
-    This function processes the first `n_series` items of the input list/series sequentially, and then processes the 
-    remaining items in parallel using multiprocessing. The list is divided into chunks, each processed by a separate 
+    This function processes the first `n_series` items of the input list/series sequentially, and then processes the
+    remaining items in parallel using multiprocessing. The list is divided into chunks, each processed by a separate
     process. If the input is a pandas Series, the output will also be a Series with the same index.
     """
-    
+
     if cores is None:
         cores = multiprocessing.cpu_count()
 
@@ -67,7 +67,6 @@ def parallel_apply(input_list, func, cores=None, n_series=0):
     return results
 
 
-
 def parallel_batch_apply(input_list, batch_func, batch_size=None, cores=None):
     """
     Applies a function to batches of items in a list in parallel.
@@ -101,7 +100,11 @@ def parallel_batch_apply(input_list, batch_func, batch_size=None, cores=None):
         }
 
         # Collect results as batches are completed
-        for future in tqdm(concurrent.futures.as_completed(future_to_batch), total=len(batches), desc="Processing Batches"):
+        for future in tqdm(
+            concurrent.futures.as_completed(future_to_batch),
+            total=len(batches),
+            desc="Processing Batches",
+        ):
             results.extend(future.result())
 
     return results

@@ -4,6 +4,7 @@ import re
 import spacy
 import logging
 from tqdm import tqdm
+from multiprocessing import cpu_count
 from utils import parallel_batch_apply
 
 # Set up basic configuration for logging
@@ -21,7 +22,9 @@ def load_nlp_model():
     """
     # Loading spaCy NLP model and setting up EntityRuler...
     nlp = spacy.load("en_core_web_sm")
-    nlp.max_length = 2000000  # Increase the character limit to 2 million characters, for example
+    nlp.max_length = (
+        2000000  # Increase the character limit to 2 million characters, for example
+    )
     name_ruler = nlp.add_pipe("entity_ruler")
     patterns = [
         {"label": "PERSON", "pattern": [{"lower": "delainey"}]},
@@ -92,12 +95,7 @@ def process_texts(batch):
     return [change_ents(text) for text in nlp.pipe(batch)]
 
 
-@click.command()
-@click.option(
-    "--email_file", type=click.Path(exists=True), help="Path to the input email file."
-)
-@click.option("--output", type=click.Path(), help="Path for the output file.")
-def main(email_file, output):
+def main():
     """
     Main function to process emails from a file and save the results to an output file.
 
@@ -105,16 +103,26 @@ def main(email_file, output):
         email_file (str): Path to the input email file.
         output (str): Path for the output file.
     """
-    logging.info(f"Reading email data from {email_file}...")
-    df = pd.read_csv(email_file, index_col="Original Index")
+    for dataset in ["norm", "exec", "poi"]:
+        email_file = f"data/{dataset}_emails.csv"
+        logging.info(f"Reading email data from {email_file}...")
+        df = pd.read_csv(email_file, index_col="Original Index")
 
-    logging.info("Starting email processing...")
-    replaced_emails = parallel_batch_apply(df["Email"], process_texts, batch_size=len(df["Email"]) // 16 // 10, cores=16)
+        logging.info(f"Starting {dataset} email processing...")
+        replaced_emails = parallel_batch_apply(
+            df["Email"],
+            process_texts,
+            batch_size=len(df) // 200,
+            cores=min([16, cpu_count()]),
+        )
 
-    df["Masked Email"] = replaced_emails
-    logging.info(f"Saving masked emails to {output}...")
-    df.to_csv(output)
-    logging.info("Masking complete. Output saved.")
+        df["Masked Email"] = replaced_emails
+
+        output = f"data/{dataset}_masked_emails.csv"
+        logging.info(f"Saving masked emails to {output}...")
+        df.to_csv(output)
+
+        logging.info("Masking complete. Output saved.")
 
 
 if __name__ == "__main__":
