@@ -131,3 +131,29 @@ stages:
       hash: md5
       md5: 45ece86a0bb4fd571a8530b55004f135
       size: 4851944
+  modelling:
+    cmd: mkdir -p data/model_runs && python code/modelling.py --train_file data/train_set.csv
+      --valid_file data/valid_set.csv --test_file data/test_set.csv
+    deps:
+    - path: data/test_set.csv
+      hash: md5
+      md5: 6502d9944c87aefa34e91803fa4786e4
+      size: 8317942
+    - path: data/train_set.csv
+      hash: md5
+      md5: 0b8e5f915928d343bafe3c8421f28896
+      size: 16244102
+    - path: data/valid_set.csv
+      hash: md5
+      md5: 45ece86a0bb4fd571a8530b55004f135
+      size: 4851944
+    outs:
+    - path: data/experiment_data.csv
+      hash: md5
+      md5: 930c6346f25ea386186314311407964b
+      size: 2674
+    - path: data/model_runs
+      hash: md5
+      md5: b0ec480e9358295c7c5466dafd454727.dir
+      size: 231099500
+      nfiles: 69

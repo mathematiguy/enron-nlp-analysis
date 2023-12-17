@@ -52,9 +52,9 @@ stages:
     outs:
       - data/experiment_data.csv
       - data/model_runs
-  report:
-    cmd: bash -c "cd report && latexmk article.tex -pdf"
-    deps:
-      - report/article.tex
-    outs:
-      - report/article.pdf
+  # report:
+  #   cmd: bash -c "cd report && latexmk article.tex -pdf"
+  #   deps:
+  #     - report/article.tex
+  #   outs:
+  #     - report/article.pdf
