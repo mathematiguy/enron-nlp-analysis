@@ -12,3 +12,4 @@
 **/.ipynb_checkpoints
 data/
 .secrets
+**/__pycache__
