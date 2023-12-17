@@ -57,3 +57,20 @@ stages:
       hash: md5
       md5: 9ee6af0a052c3759155a3eacb9884c55
       size: 72027320
+  mask_datasets:
+    cmd: python code/mask_datasets.py --email_file data/processed_emails.csv --output
+      data/masked_emails.csv
+    deps:
+    - path: code/mask_datasets.py
+      hash: md5
+      md5: 975113911d4d0510ba3a33e55e9d37ec
+      size: 3882
+    - path: data/processed_emails.csv
+      hash: md5
+      md5: 9ee6af0a052c3759155a3eacb9884c55
+      size: 72027320
+    outs:
+    - path: data/masked_emails.csv
+      hash: md5
+      md5: b1e32fa0c2c8a1020f3631f163739c24
+      size: 146206503

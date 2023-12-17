@@ -15,6 +15,7 @@ pandas
 pyprojroot
 scikit-learn
 scipy
+spacy
 stanza
 torch>=2.0.1
 tqdm

@@ -19,6 +19,13 @@ stages:
       - data/person_info.yaml
     outs:
       - data/processed_emails.csv
+  mask_datasets:
+    cmd: python code/mask_datasets.py --email_file data/processed_emails.csv --output data/masked_emails.csv
+    deps:
+      - code/mask_datasets.py
+      - data/processed_emails.csv
+    outs:
+     - data/masked_emails.csv
   report:
     cmd: bash -c "cd report && latexmk article.tex -pdf"
     deps:
