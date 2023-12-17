@@ -36,3 +36,24 @@ stages:
       hash: md5
       md5: db9b823991c86d5c98c2a6ab30e8fd78
       size: 5517
+  parse_messages:
+    cmd: python code/parse_messages.py --emails_file data/enron_emails.parquet --person_yaml
+      data/person_info.yaml --output data/processed_emails.csv
+    deps:
+    - path: code/parse_messages.py
+      hash: md5
+      md5: de35f9032a3704cb3a3fcd4f5a1cd91b
+      size: 9363
+    - path: data/enron_emails.parquet
+      hash: md5
+      md5: e32b0855968545645da7d1fd57d32ba7
+      size: 598003929
+    - path: data/person_info.yaml
+      hash: md5
+      md5: edb3847eda1bc5aad5a96915aad393e7
+      size: 2193
+    outs:
+    - path: data/processed_emails.csv
+      hash: md5
+      md5: 9ee6af0a052c3759155a3eacb9884c55
+      size: 72027320

@@ -11,6 +11,14 @@ stages:
       - code/scrape_conviction_data.py
     outs:
       - data/convictions.csv
+  parse_messages:
+    cmd: python code/parse_messages.py --emails_file data/enron_emails.parquet --person_yaml data/person_info.yaml --output data/processed_emails.csv
+    deps:
+      - code/parse_messages.py
+      - data/enron_emails.parquet
+      - data/person_info.yaml
+    outs:
+      - data/processed_emails.csv
   report:
     cmd: bash -c "cd report && latexmk article.tex -pdf"
     deps:
