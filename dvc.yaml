@@ -46,6 +46,7 @@ stages:
   modelling:
     cmd: mkdir -p data/model_runs && python code/modelling.py --train_file data/train_set.csv --valid_file data/valid_set.csv --test_file data/test_set.csv
     deps:
+      - code/modelling.py
       - data/train_set.csv
       - data/valid_set.csv
       - data/test_set.csv

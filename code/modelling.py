@@ -298,7 +298,7 @@ def run_experiment(
     current_model.train_model(X_train, y_train)
     f1_score = current_model.compute_f1(X_valid, y_valid)
     acc = current_model.compute_accuracy(X_valid, y_valid)
-    model_path = f"data/model_runs/p={processor_name}-m={model_type}-h={hyperparam}"
+    model_path = f"data/model_runs/f1={f1_score:.4f}-p={processor_name}-m={model_type}-h={hyperparam}"
     current_model.save_model(model_path)
     return (model_path, processor_name, model_type, hyperparam, f1_score, acc)
 
@@ -357,15 +357,7 @@ def main(train_file, valid_file, test_file):
     model_types = ["naive", "logistic"]
     hyperparams = [0.5, 1.0, 10.0]
 
-    best_model = {
-        "preprocessor": "lemmatize_unigram_preprocessor",
-        "model": "naive",
-        "hyperparam": 0.5,
-        "f1_score": 0,
-        "model": None,
-    }
-
-    def run_experiments_in_parallel(n_series=0):
+    def run_experiments_in_parallel():
         num_workers = cpu_count()
 
         results = []  # List to store the results of experiments
@@ -379,13 +371,13 @@ def main(train_file, valid_file, test_file):
                 executor.submit(
                     run_experiment, *exp, X_train, y_train, X_valid, y_valid
                 ): exp
-                for exp in experiments[n_series:]
+                for exp in experiments
             }
 
             futures = concurrent.futures.as_completed(future_to_experiment)
             for future in tqdm(
                 futures,
-                total=len(experiments) - n_series,
+                total=len(experiments),
                 desc="Processing Experiments",
             ):
                 experiment = future_to_experiment[future]
@@ -412,7 +404,7 @@ def main(train_file, valid_file, test_file):
 
         return results
 
-    results = run_experiments_in_parallel(n_series=1)
+    results = run_experiments_in_parallel()
 
     experiment_data = pd.DataFrame(
         results,
