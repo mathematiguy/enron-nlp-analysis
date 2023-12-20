@@ -53,6 +53,8 @@ stages:
     outs:
       - data/experiment_data.csv
       - data/model_runs
+      - data/token_coeffs.csv
+      - data/best_model_data.csv
   # report:
   #   cmd: bash -c "cd report && latexmk article.tex -pdf"
   #   deps:

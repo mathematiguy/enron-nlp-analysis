@@ -2,6 +2,7 @@ accelerate
 black
 chardet
 click
+convokit
 datasets
 dvc
 ipython

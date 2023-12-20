@@ -109,13 +109,7 @@ def main():
         df = pd.read_csv(email_file, index_col="Original Index")
 
         logging.info(f"Starting {dataset} email processing...")
-        replaced_emails = parallel_batch_apply(
-            df["Email"],
-            process_texts,
-            batch_size=len(df) // 200,
-            cores=min([16, cpu_count()]),
-        )
-
+        replaced_emails = process_texts(tqdm(df["Email"]))
         df["Masked Email"] = replaced_emails
 
         output = f"data/{dataset}_masked_emails.csv"

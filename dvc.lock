@@ -70,8 +70,8 @@ stages:
     deps:
     - path: code/mask_datasets.py
       hash: md5
-      md5: 49ead517630c098d7827f78e6532dbac
-      size: 3975
+      md5: 756cc21fcf62c807ecf95d107d501b15
+      size: 3842
     - path: data/exec_emails.csv
       hash: md5
       md5: 73882d3d8daa266eddf749b844088f97
@@ -87,15 +87,15 @@ stages:
     outs:
     - path: data/exec_masked_emails.csv
       hash: md5
-      md5: 007773a65a25c495eba45b78e190a65c
+      md5: 358b8974c11d7e5f2bb97f2377dc55dd
       size: 90566371
     - path: data/norm_masked_emails.csv
       hash: md5
-      md5: d28ff2ec352c22f961b0e4c9f2ae219f
+      md5: 914dac8b552ae1e81ee779884df30764
       size: 181420716
     - path: data/poi_masked_emails.csv
       hash: md5
-      md5: b55e769bde5a88784fc5f73c4ccc2bf4
+      md5: 1771119fac38a3d912218f326db7b480
       size: 6546914
   dataset_splitting:
     cmd: python code/dataset_splitting.py --poi_file data/poi_masked_emails.csv --exec_file
@@ -108,56 +108,64 @@ stages:
       size: 3975
     - path: data/exec_masked_emails.csv
       hash: md5
-      md5: 007773a65a25c495eba45b78e190a65c
+      md5: 358b8974c11d7e5f2bb97f2377dc55dd
       size: 90566371
     - path: data/norm_masked_emails.csv
       hash: md5
-      md5: d28ff2ec352c22f961b0e4c9f2ae219f
+      md5: 914dac8b552ae1e81ee779884df30764
       size: 181420716
     - path: data/poi_masked_emails.csv
       hash: md5
-      md5: b55e769bde5a88784fc5f73c4ccc2bf4
+      md5: 1771119fac38a3d912218f326db7b480
       size: 6546914
     outs:
     - path: data/test_set.csv
       hash: md5
-      md5: 6502d9944c87aefa34e91803fa4786e4
-      size: 8317942
+      md5: fcfba5aed1abcaa858663c0878aed622
+      size: 7959195
     - path: data/train_set.csv
       hash: md5
-      md5: 0b8e5f915928d343bafe3c8421f28896
-      size: 16244102
+      md5: ba9ac61a300c043a77ad22f52eb05959
+      size: 80312238
     - path: data/valid_set.csv
       hash: md5
-      md5: 45ece86a0bb4fd571a8530b55004f135
-      size: 4851944
+      md5: 2988329f4cb6ea5514892266931fb93c
+      size: 5014712
   modelling:
     cmd: mkdir -p data/model_runs && python code/modelling.py --train_file data/train_set.csv
       --valid_file data/valid_set.csv --test_file data/test_set.csv
     deps:
     - path: code/modelling.py
       hash: md5
-      md5: 626510947e208580301922b406476741
-      size: 14130
+      md5: f972d419619194e5121e3e428c30088f
+      size: 16438
     - path: data/test_set.csv
       hash: md5
-      md5: 6502d9944c87aefa34e91803fa4786e4
-      size: 8317942
+      md5: fcfba5aed1abcaa858663c0878aed622
+      size: 7959195
     - path: data/train_set.csv
       hash: md5
-      md5: 0b8e5f915928d343bafe3c8421f28896
-      size: 16244102
+      md5: ba9ac61a300c043a77ad22f52eb05959
+      size: 80312238
     - path: data/valid_set.csv
       hash: md5
-      md5: 45ece86a0bb4fd571a8530b55004f135
-      size: 4851944
+      md5: 2988329f4cb6ea5514892266931fb93c
+      size: 5014712
     outs:
+    - path: data/best_model_data.csv
+      hash: md5
+      md5: c3d7adec074ac1f860b8cf466ea57413
+      size: 389
     - path: data/experiment_data.csv
       hash: md5
-      md5: 69a2f70c3af5c5e018be772991c0b08f
-      size: 3030
+      md5: bc1b6346bf8fd177509ddd4c513e3f8f
+      size: 3963
     - path: data/model_runs
       hash: md5
-      md5: 3aaad1998502552f86c0f20c9b9b6a6a.dir
-      size: 233688294
+      md5: 9ea236a18e65e6e0839fc5907325d112.dir
+      size: 262236960
       nfiles: 72
+    - path: data/token_coeffs.csv
+      hash: md5
+      md5: 984e454218a4d93e4abb2705baed4869
+      size: 2644153

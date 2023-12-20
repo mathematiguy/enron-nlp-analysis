@@ -200,19 +200,21 @@ class TextModelFactory:
         X_vectorized = self.vectorizer.transform(X_processed)
         return self.classifier.predict(X_vectorized)
 
-    def compute_f1(self, X, y_true):
+    def compute_scores(self, X, y_true):
         """
-        Computes the F1 score for the given data and true labels.
+        Computes the Precision, Recall and F1 score for the given data and true labels.
 
         Args:
             X (list): List of data.
             y_true (list): True labels.
 
         Returns:
+            float: Precision.
+            float: Recall.
             float: F1 score.
         """
         y_pred = self.predict(X)
-        return precision_recall_fscore_support(y_true, y_pred, average="weighted")[2]
+        return precision_recall_fscore_support(y_true, y_pred, average="weighted")[:3]
 
     def compute_accuracy(self, X, y_true):
         """
@@ -263,19 +265,35 @@ class TextModelFactory:
         print(f"Preprocessor config saved to {preprocessor_config_filename}")
 
     @staticmethod
-    def load_model(filename):
+    def load_model(filename, preprocess_func=None):
         """
-        Loads the model, vectorizer, and preprocessor config from disk.
-
+        Loads the model, vectorizer, and preprocessor config from disk and initializes a TextModelFactory object.
+    
+        Args:
+            filename (str): The base filename where the model and vectorizer were saved.
+            preprocess_func (function): The preprocessing function to use. If None, it will load from saved config.
+    
         Returns:
-            Tuple containing the classifier, vectorizer, and a TextPreprocessor instance.
+            TextModelFactory: An instance of the TextModelFactory with the loaded classifier.
         """
+        # Load the classifier, vectorizer, and preprocessor config from disk
         classifier = joblib.load(f"{filename}_classifier.joblib")
         vectorizer = joblib.load(f"{filename}_vectorizer.joblib")
         preprocessor_config = joblib.load(f"{filename}_preprocessor_config.joblib")
-
-        preprocessor = TextPreprocessor(**preprocessor_config)
-        return classifier, vectorizer, preprocessor
+    
+        # If no preprocess_func is given, initialize one from the loaded config
+        if preprocess_func is None:
+            preprocess_func = TextPreprocessor(**preprocessor_config)
+        
+        # Initialize a new TextModelFactory instance
+        new_model_factory = TextModelFactory(preprocess_func=preprocess_func)
+    
+        # Set the loaded classifier and vectorizer
+        new_model_factory.classifier = classifier
+        new_model_factory.vectorizer = vectorizer
+    
+        # Return the new TextModelFactory instance
+        return new_model_factory
 
 
 def run_experiment(
@@ -296,11 +314,61 @@ def run_experiment(
     )
 
     current_model.train_model(X_train, y_train)
-    f1_score = current_model.compute_f1(X_valid, y_valid)
+    precision, recall, f1_score = current_model.compute_scores(X_valid, y_valid)
     acc = current_model.compute_accuracy(X_valid, y_valid)
     model_path = f"data/model_runs/f1={f1_score:.4f}-p={processor_name}-m={model_type}-h={hyperparam}"
     current_model.save_model(model_path)
-    return (model_path, processor_name, model_type, hyperparam, f1_score, acc)
+    return (model_path, processor_name, model_type, hyperparam, precision, recall, f1_score, acc)
+
+
+def run_experiments_in_parallel(
+    preprocessors, model_types, hyperparams, X_train, y_train, X_valid, y_valid
+):
+    num_workers = cpu_count()
+
+    results = []  # List to store the results of experiments
+    experiments = list(it.product(preprocessors.items(), model_types, hyperparams))
+
+    # Process the remaining experiments in parallel
+    with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
+        future_to_experiment = {
+            executor.submit(
+                run_experiment, *exp, X_train, y_train, X_valid, y_valid
+            ): exp
+            for exp in experiments
+        }
+
+        futures = concurrent.futures.as_completed(future_to_experiment)
+        for future in tqdm(
+            futures,
+            total=len(experiments),
+            desc="Processing Experiments",
+        ):
+            experiment = future_to_experiment[future]
+            try:
+                # Retrieve the results of the experiment
+                result = future.result()
+                results.append(result)
+                (
+                    model_path,
+                    processor_name,
+                    model_type,
+                    hyperparam,
+                    precision,
+                    recall,
+                    f1_score,
+                    acc,
+                ) = result
+                logging.info(
+                    f"Processor={processor_name}, model_type={model_type}, hyperparam={hyperparam}, f1_score={f1_score}, acc={acc}"
+                )
+            except Exception as exc:
+                processor, model_type, hyperparam = experiment
+                logging.error(
+                    f"{processor}, {model_type}, {hyperparam} generated an exception: {exc}"
+                )
+
+    return results
 
 
 # CLI entry point
@@ -357,70 +425,54 @@ def main(train_file, valid_file, test_file):
     model_types = ["naive", "logistic"]
     hyperparams = [0.5, 1.0, 10.0]
 
-    def run_experiments_in_parallel():
-        num_workers = cpu_count()
+    results = run_experiments_in_parallel(
+        preprocessors, model_types, hyperparams, X_train, y_train, X_valid, y_valid
+    )
 
-        results = []  # List to store the results of experiments
-        experiments = list(it.product(preprocessors.items(), model_types, hyperparams))
-
-        # Process the remaining experiments in parallel
-        with concurrent.futures.ProcessPoolExecutor(
-            max_workers=num_workers
-        ) as executor:
-            future_to_experiment = {
-                executor.submit(
-                    run_experiment, *exp, X_train, y_train, X_valid, y_valid
-                ): exp
-                for exp in experiments
-            }
-
-            futures = concurrent.futures.as_completed(future_to_experiment)
-            for future in tqdm(
-                futures,
-                total=len(experiments),
-                desc="Processing Experiments",
-            ):
-                experiment = future_to_experiment[future]
-                try:
-                    # Retrieve the results of the experiment
-                    result = future.result()
-                    results.append(result)
-                    (
-                        model_path,
-                        processor_name,
-                        model_type,
-                        hyperparam,
-                        f1_score,
-                        acc,
-                    ) = result
-                    logging.info(
-                        f"Processor={processor_name}, model_type={model_type}, hyperparam={hyperparam}, f1_score={f1_score}, acc={acc}"
-                    )
-                except Exception as exc:
-                    processor, model_type, hyperparam = experiment
-                    logging.error(
-                        f"{processor}, {model_type}, {hyperparam} generated an exception: {exc}"
-                    )
-
-        return results
-
-    results = run_experiments_in_parallel()
-
-    experiment_data = pd.DataFrame(
-        results,
-        columns=[
-            "model_path",
-            "preprocessor",
-            "model_type",
-            "hyperparam",
-            "val_f1_score",
-            "val_acc",
-        ],
-    ).sort_values("val_f1_score", ascending=False)
+    experiment_data = (
+        pd.DataFrame(
+            results,
+            columns=[
+                "model_path",
+                "preprocessor",
+                "model_type",
+                "hyperparam",
+                "val_precision",
+                "val_recall",
+                "val_f1_score",
+                "val_acc"
+            ],
+        )
+        .sort_values("val_f1_score", ascending=False)
+        .reset_index(drop=True)
+    )
 
     # Save experiment data
     experiment_data.to_csv("data/experiment_data.csv", index=False)
     print(experiment_data)
+
+    # Get the best model
+    best_model_path = experiment_data.loc[0, "model_path"]
+    model = TextModelFactory.load_model(best_model_path)
+    precision, recall, f1_score = model.compute_scores(X_test, y_test)
+    acc = model.compute_accuracy(X_test, y_test)
+    
+    best_model_data = experiment_data.loc[0, :].to_frame().transpose()
+    best_model_data['test_precision'] = precision
+    best_model_data['test_recall'] = recall
+    best_model_data['test_f1_score'] = f1_score
+    best_model_data['test_acc'] = acc
+
+    best_model_data.to_csv('data/best_model_data.csv', index=False)
+    
+    # Extract words that best explain the model predictions
+    inv_vocab = {model.vectorizer.vocabulary_[key]: key for key in model.vectorizer.vocabulary_}
+    coefs = pd.DataFrame(model.classifier.coef_.reshape((-1,)), columns=["Parameter"])
+    coefs["Parameter Positive"] = coefs["Parameter"].apply(lambda x: 0 if x < 0 else 1)
+    coefs["|Parameter|"] = np.abs(coefs["Parameter"])
+    coefs["Word"] = [inv_vocab[key] for key in coefs.index]
+    coefs = coefs.sort_values("|Parameter|", ascending=False)
+    coefs.to_csv("data/token_coeffs.csv")
 
 
 if __name__ == "__main__":
